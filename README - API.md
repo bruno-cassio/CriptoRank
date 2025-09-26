@@ -25,14 +25,16 @@ Bruno_de_Cassio/
 
 1. Crie um ambiente virtual :
 
-   python -m venv venv
-   source venv/bin/activate   # Linux/Mac
-   venv\Scripts\activate      # Windows
+   `python -m venv venv source venv/bin/activate   # Linux/Mac venv\Scripts\activate      # Windows`
 2. Instale as dependências:
 
-   pip install -r requirements.txt
+   `pip install -r requirements.txt`
 
-## Boas práticas e decisões técnicas
+## Execução
+
+`python crypto_api.py`
+
+## Decisões técnicas
 
 1. Fail-fast para variáveis obrigatórias
 
@@ -64,7 +66,3 @@ DEFAULT_PER_PAGE=10
 RATE_LIMIT_DELAY=1
 TIMEZONE=America/Sao_Paulo
 OUTPUT_FILE=Bruno_de_Cassio/outputs/api_output.csv
-
-## Execução
-
-python crypto_api.py
