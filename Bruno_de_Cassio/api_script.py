@@ -3,7 +3,7 @@ Script para coleta de dados de criptomoedas via API pública (CoinGecko).
 Gera um CSV padronizado com informações de preço, market cap e variações.
 
 Notas:
-- Eu  centralizo configurações em .env e faço "fail fast"
+-  centralizo configurações em .env e faço "fail fast"
   para variáveis obrigatórias.
 - Tenho opção de formatar valores para leitura humana (FORMAT_OUTPUT_VALUES)
   ou manter valores numéricos para processamento.
@@ -68,8 +68,10 @@ HEADER_MAP = {
 }
 
 # aplicação do Logging para debug geral. 
+ # MANTIVE LEVEL DEBUG AO INVES DE INFO, PARA PODER DURANTE A AVALIAÇÃO IDENTIFICAR POSSIVEIS DESVIOS DA CONSULTA.
+ # EM NIVEL PRODUÇÃO USO APENAS LEVEL = INFO PARA NAO TER POLUIÇÃO VISUAL.
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()]
 )
@@ -101,11 +103,15 @@ def fetch_crypto_data(vs_currency: str = DEFAULT_CURRENCY, per_page: int = DEFAU
         "price_change_percentage": "1h,24h,7d"
     }
 
+    logging.debug("Parâmetros da requisição: %s", params)
     try:
         logging.info("Iniciando coleta das top %d moedas em %s...", per_page, vs_currency)
         response = session.get(API_URL, params=params, timeout=15)
         response.raise_for_status()
+        logging.debug("Status da resposta da API: %s", response.status_code)
         data = response.json()
+        logging.debug("Quantidade de moedas recebidas: %d", len(data))
+
 
         #validação extra (evito processar payloads inesperados)
         if not isinstance(data, list) or not data:
@@ -152,6 +158,7 @@ def normalize_dataframe(data: List[Dict[str, Any]]) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = None
 
+    logging.debug("DataFrame antes da formatação:\n%s", df.head())
     # lastro  para formatação
     money_cols = ["preco_usd", "capitalizacao_mercado_usd", "volume_24h_usd"]
     pct_cols = ["variacao_1h_pct", "variacao_24h_pct", "variacao_7d_pct"]
@@ -172,6 +179,8 @@ def normalize_dataframe(data: List[Dict[str, Any]]) -> pd.DataFrame:
         for col in pct_cols:
             df[col] = df[col].apply(fmt_pct)
 
+    
+
     else:
         #mantenho numérico (útil para processamento posterior)
         for col in money_cols:
@@ -181,8 +190,11 @@ def normalize_dataframe(data: List[Dict[str, Any]]) -> pd.DataFrame:
             df[col] = pd.to_numeric(df[col], errors="coerce").round(2)
 
     # renomeio colunas para cabeçalho legível e retorno na ordem desejada
+    
     readable_order = [HEADER_MAP[c] for c in COLUMNS]
     df = df.rename(columns=HEADER_MAP)
+    logging.debug("DataFrame após formatação:\n%s", df.head())    
+    
     return df[readable_order]
 
 
