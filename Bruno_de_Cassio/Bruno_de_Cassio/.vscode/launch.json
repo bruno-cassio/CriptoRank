@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Módulo Cripto API",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/api/crypto_api.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
